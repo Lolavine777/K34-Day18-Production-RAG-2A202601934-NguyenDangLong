@@ -2,7 +2,7 @@
 
 **Học viên:** Nguyễn Đăng Long  
 **Mã số học viên / Nhóm:** 2A202601934 · AICB-K34  
-**Phạm vi phụ trách:** Triển khai toàn diện 5 Modules (M1 Chunking, M2 Hybrid Search, M3 Reranking, M4 RAGAS Evaluation, M5 Chunk Enrichment) và tích hợp hệ thống.  
+**Phạm vi phụ trách:** Triển khai toàn diện 5 Modules (M1 Chunking, M2 Hybrid Search, M3 Reranking, M4 RAGAS Evaluation, M5 Chunk Enrichment) và tối ưu hóa hệ thống.  
 
 ---
 
@@ -13,13 +13,13 @@ Bảng đối chiếu giữa các khái niệm lý thuyết trong bài giảng v
 | Khái niệm Lý thuyết | Module | Hàm / Class cụ thể | Quan sát & Đánh giá thực nghiệm |
 |---------------------|--------|---------------------|---------------------------------|
 | Semantic Chunking | M1 | [`chunk_semantic()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m1_chunking.py#L89-L130) | Ngưỡng cosine similarity `0.85` giúp gom các câu cùng chủ đề mà không làm đứt đoạn ngữ cảnh câu, khắc phục nhược điểm cắt thô bạo theo độ dài cố định. |
-| Hierarchical Chunking (Parent-Child) | M1 | [`chunk_hierarchical()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m1_chunking.py#L133-L200) | Chia Parent chunk 2048 ký tự và Child chunk 256 ký tự; truy xuất theo Child chunk để tăng độ chính xác nhưng trả về Parent context cho LLM giúp Faithfulness tăng vọt lên 0.9217. |
+| Hierarchical Chunking (Parent-Child) & Small-to-Big Retrieval | M1 & Pipeline | [`chunk_hierarchical()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m1_chunking.py#L133-L200), [`src/pipeline.py`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/pipeline.py) | Chia Parent chunk 2048 ký tự và Child chunk 256 ký tự; tìm kiếm trên Child chunk để đạt độ chính xác từ khóa nhưng truyền Parent context cho LLM giúp Context Recall đạt 0.9500 và Context Precision đạt 0.9417. |
 | Structure-Aware Chunking | M1 | [`chunk_structure_aware()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m1_chunking.py#L203-L245) | Parse các đề mục Markdown headers (`#`, `##`, `###`) để giữ nguyên vẹn bảng biểu quy chế và cấu trúc logic của tài liệu hành chính. |
 | Vietnamese Word Segmentation | M2 | [`segment_vietnamese()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m2_search.py#L21-L30) | Sử dụng `underthesea` và thay thế ký tự `_` thành khoảng trắng để đảm bảo BM25 tokenize đồng nhất giữa query và corpus tiếng Việt. |
 | BM25 + Dense Hybrid Search | M2 | [`BM25Search`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m2_search.py#L33-L66), [`DenseSearch`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m2_search.py#L69-L113) | Kết hợp ưu điểm tìm từ khóa chính xác của BM25 và hiểu ngữ nghĩa sâu của `BAAI/bge-m3` trên Qdrant vector database. |
 | Reciprocal Rank Fusion (RRF) | M2 | [`reciprocal_rank_fusion()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m2_search.py#L116-L135) | Áp dụng công thức $RRF\_Score = \sum \frac{1}{k + rank + 1}$ ($k=60$) giúp dung hòa thứ hạng giữa dense score và sparse score mà không cần chuẩn hóa scale điểm. |
 | Cross-Encoder Reranking | M3 | [`CrossEncoderReranker.rerank()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m3_rerank.py#L21-L53) | Model `BAAI/bge-reranker-v2-m3` đánh giá tương quan trực tiếp cặp `(query, document)`, lọc từ Top-20 ứng viên xuống Top-3 chất lượng nhất, loại bỏ hoàn toàn tài liệu nhiễu. |
-| RAGAS 4 Metrics Evaluation | M4 | [`evaluate_ragas()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m4_eval.py#L29-L110) | Đánh giá khách quan 4 chiều: Faithfulness (0.9217), Answer Relevancy (0.8040), Context Precision (0.8083), Context Recall (0.7500). |
+| RAGAS 4 Metrics Evaluation | M4 | [`evaluate_ragas()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m4_eval.py#L29-L110) | Đánh giá khách quan 4 chiều: Faithfulness (0.9014), Answer Relevancy (0.9316), Context Precision (0.9417), Context Recall (0.9500). |
 | Failure Diagnostic Tree | M4 | [`failure_analysis()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m4_eval.py#L113-L153) | Tự động phân loại nguyên nhân lỗi truy vấn vào Error Tree để đưa ra giải pháp khắc phục cụ thể theo từng điểm nghẽn. |
 | Contextual Embeddings & HyQA | M5 | [`_enrich_single_call()`](file:///Users/nguyendanglong/Documents/VINUNI/day18/src/m5_enrichment.py#L157-L190) | Làm giàu chunk bằng 1 API call duy nhất sinh Summary, 3 câu hỏi giả định và vị trí tài liệu, giúp bắc cầu khoảng cách từ vựng giữa câu hỏi người dùng và nội dung văn bản. |
 
@@ -35,11 +35,11 @@ Bảng đối chiếu giữa các khái niệm lý thuyết trong bài giảng v
 - **Cách debug & Giải quyết:**  
   Kiểm tra mã nguồn của `ragas.metrics.answer_relevancy` bằng `inspect.getsource(answer_relevancy._ascore)`, phát hiện thuộc tính `strictness`. Thiết lập `answer_relevancy.strictness = 1` trước khi chạy `evaluate()`, giúp Ragas chạy trơn tru với 1 generation per prompt và tính toán đầy đủ 4 metrics.
 
-### 2. Tách từ tiếng Việt với BM25 (Underthesea Compound Words)
+### 2. Xử lý câu hỏi Multi-hop và Multi-intent phức tạp
 - **Vấn đề:**  
-  `underthesea.word_tokenize(text, format="text")` tạo ra các từ ghép nối bằng dấu gạch dưới (ví dụ: `nghỉ_phép`). Khi người dùng gõ query tìm kiếm `nghỉ phép` (phân tách bằng khoảng trắng), BM25 coi đây là 2 token riêng biệt và không khớp được với token `nghỉ_phép` trong corpus.
+  Những câu hỏi kết hợp 2 chủ đề khác nhau (ví dụ: "Nhân viên Senior có 9 năm thâm niên được nghỉ bao nhiêu ngày phép năm và lương trong khoảng nào?") bị trượt một trong hai chủ đề khi chỉ dùng single retrieval query.
 - **Cách giải quyết:**  
-  Xử lý chuỗi bằng `.replace("_", " ")` sau khi tách từ, đảm bảo định dạng token đồng nhất giữa bước lập chỉ mục (index) và bước tìm kiếm (search).
+  Xây dựng hàm `decompose_query()` tự động phân rã câu hỏi ghép thành các truy vấn đơn độc lập, thực hiện tìm kiếm song song cho từng nhánh rồi hợp nhất và rerank trước khi đưa vào LLM.
 
 ### 3. Tối ưu chi phí và thời gian làm giàu dữ liệu (Module 5 Enrichment)
 - **Vấn đề:**  
@@ -91,5 +91,5 @@ Bảng đối chiếu giữa các khái niệm lý thuyết trong bài giảng v
 |----------|---------------|----------------------|
 | Hiểu bài giảng | 5/5 | Ánh xạ đầy đủ và chính xác toàn bộ 5 modules lý thuyết vào mã nguồn thực tế. |
 | Code quality | 5/5 | 100% (37/37) unit tests pass, không còn TODO nào, code sạch, có typing và exception handling an toàn. |
-| Pipeline & Metrics | 5/5 | RAGAS Faithfulness đạt 0.9217 (>=0.85), tất cả metrics đều >= 0.75, đạt toàn bộ tiêu chí Bonus (+10 điểm). |
-| Problem solving | 5/5 | Phát hiện và khắc phục lỗi proxy RAGAS `answer_relevancy`, xử lý tokenization tiếng Việt BM25 hiệu quả. |
+| Pipeline & Metrics | 5/5 | Toàn bộ 4 chỉ số RAGAS đều vượt mốc 0.90 (Faithfulness 0.9014, Answer Relevancy 0.9316, Context Precision 0.9417, Context Recall 0.9500), đạt chuẩn Bonus tối đa (+10 điểm). |
+| Problem solving | 5/5 | Phát hiện và khắc phục lỗi proxy RAGAS `answer_relevancy`, giải quyết triệt để bài toán Multi-hop query và Versioning conflict. |
