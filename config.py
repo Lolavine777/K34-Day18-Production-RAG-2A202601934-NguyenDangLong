@@ -5,8 +5,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- API Keys ---
+# --- API Keys & Provider Settings ---
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-5.6-luna")
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL", "https://api.shopaikey.com/v1")
 
 # --- Qdrant ---
 QDRANT_HOST = "localhost"

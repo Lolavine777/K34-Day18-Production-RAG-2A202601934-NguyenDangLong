@@ -54,21 +54,22 @@ def check_todos() -> int:
 def run_tests() -> tuple[int, int]:
     """Run pytest and return (passed, total)."""
     try:
+        import re
         result = subprocess.run(
             [sys.executable, "-m", "pytest", "tests/", "-v", "--tb=no", "-q"],
-            capture_output=True, text=True, timeout=120,
+            capture_output=True, text=True, timeout=300,
         )
         lines = result.stdout.strip().split("\n")
         summary = lines[-1] if lines else ""
-        # Parse "X passed, Y failed" or "X passed"
-        passed = total = 0
-        for part in summary.split(","):
-            part = part.strip()
-            if "passed" in part:
-                passed = int(part.split()[0])
-                total += passed
-            if "failed" in part:
-                total += int(part.split()[0])
+        passed = 0
+        failed = 0
+        m_pass = re.search(r"(\d+)\s+passed", summary)
+        if m_pass:
+            passed = int(m_pass.group(1))
+        m_fail = re.search(r"(\d+)\s+failed", summary)
+        if m_fail:
+            failed = int(m_fail.group(1))
+        total = passed + failed
         return passed, total
     except Exception as e:
         print(f"  ⚠️  pytest error: {e}")
